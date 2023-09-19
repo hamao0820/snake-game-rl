@@ -12,5 +12,8 @@
   "devDependencies": {
     "@types/node": "^20.6.2",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "puppeteer": "^21.3.0"
   }
 }
