@@ -1,12 +1,16 @@
 class Score {
-  static #value: number = 0;
+  #value: number;
 
-  static addScore() {
+  constructor() {
+    this.#value = 0;
+  }
+
+  addScore() {
     this.#value += 10;
   }
 
-  static get value() {
-    return Score.#value;
+  get value() {
+    return this.#value;
   }
 }
 

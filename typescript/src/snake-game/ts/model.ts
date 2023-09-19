@@ -7,28 +7,28 @@ import Stage from './stage';
 class Model {
   readonly #snake: Snake;
   readonly #stage: Stage;
+  readonly #score: Score;
   #food: Food | null = null;
   #gameOver = false;
   #turnAngle = 0;
   constructor() {
     this.#snake = new Snake();
     this.#stage = new Stage();
-
+    this.#score = new Score();
     this.#food = this.createFood();
   }
 
-  update(ctx: CanvasRenderingContext2D) {
+  update(isCollisionSelf: boolean) {
     this.#snake.turn(this.#turnAngle);
     this.#snake.move();
 
     if (this.#food && Judger.checkCollisionFood(this.#snake, this.#food)) {
       this.#food = this.createFood();
       this.#snake.grow();
-      Score.addScore();
+      this.#score.addScore();
       return;
     }
-    // TODO: checkCollisionSelfの置き換え
-    if (Judger.checkCollisionWall(this.#snake) || Judger.checkCollisionSelf(this.#snake, ctx)) {
+    if (Judger.checkCollisionWall(this.#snake) || isCollisionSelf) {
       this.#gameOver = true;
     }
   }
@@ -57,6 +57,10 @@ class Model {
 
   get gameOver() {
     return this.#gameOver;
+  }
+
+  get score() {
+    return this.#score.value;
   }
 }
 
