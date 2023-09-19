@@ -1,0 +1,70 @@
+body {
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.game {
+    width: 300px;
+    margin: auto;
+}
+
+#score {
+    position: relative;
+    width: 300px;
+    font-size: 20px;
+    padding: 5px 0;
+}
+
+.container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.controller-container {
+    position: relative;
+    width: 300px;
+    height: 90px;
+}
+
+#left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 90px;
+    background-color: #cc0;
+}
+
+#right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 90px;
+    background-color: #0cc;
+}
+
+#start {
+    width: 300px;
+    height: 90px;
+    background-color: #ccc;
+    font-size: 20px;
+    padding: 5px 0;
+    display: grid;
+    place-items: center;
+}
+
+#start.unavailable {
+    background-color: #999;
+    color: #666;
+}
+
+#start:hover {
+    cursor: pointer;
+}
+
+#start.unavailable:hover {
+    cursor: not-allowed;
+}

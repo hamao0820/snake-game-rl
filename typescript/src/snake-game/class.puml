@@ -1,0 +1,109 @@
+@startuml
+class Countdown {
+    +#time: number | null
+    +#rapTime: number
+    +tick(): void
+    +time: number
+    +countDown: number
+}
+class Food {
+    +x: number
+    +y: number
+}
+class Stage {
+    +{static} Size: 300
+}
+class Snake {
+    +#positionList: [number, number][]
+    +#mx: number
+    +#my: number
+    +#speed: number
+    +#angle: number
+    +turn(turnAngle: number): void
+    +move(): void
+    +grow(): void
+    +positionList: [number, number][]
+    +angle: number
+    +mx: number
+    +my: number
+    +{static} initialLength: 150
+    +{static} halfWidth: 8
+}
+class Judger {
+    +{static} checkCollisionWall(snake: Snake): boolean
+    +{static} checkCollisionSelf(snake: Snake, ctx: CanvasRenderingContext2D): boolean
+    +{static} checkCollisionFood(snake: Snake, food: Food): boolean
+}
+class Score {
+    +{static} #score: number
+    +{static} #element: HTMLDivElement
+    +{static} init(): void
+    +{static} addScore(): void
+}
+class Model {
+    +#snake: Snake
+    +#stage: Stage
+    +#food: Food | null
+    +#gameOver: boolean
+    +#turnAngle: number
+    +#countdown: Countdown
+    +update(ctx: CanvasRenderingContext2D): void
+    +createFood(): Food
+    +turnAngle: number
+    +snake: Snake
+    +stage: Stage
+    +food: Food | null
+    +gameOver: boolean
+    +countdown: Countdown
+}
+class View {
+    +#model: Model
+    +#ctx: CanvasRenderingContext2D
+    -renderStage(): void
+    -renderSnake(): void
+    -renderSnakeEye(): void
+    -renderFood(): void
+    +renderCountdown(): void
+    +render(): void
+    +ctx: CanvasRenderingContext2D
+}
+class Controller {
+    +#view: View
+    +#model: Model
+    +#leftButton: HTMLButtonElement
+    +#rightButton: HTMLButtonElement
+    -turnLeft(e: MouseEvent | KeyboardEvent): void
+    -turnRight(e: MouseEvent | KeyboardEvent): void
+    -stopTurn(e: MouseEvent | KeyboardEvent): void
+    +reset(): void
+}
+class StartButton {
+    +{static} #element: HTMLDivElement
+    +{static} init(game: Game): void
+    -{static} start(game: Game): void
+    +{static} restart(): void
+    +{static} unavailable(): void
+    +{static} available(): void
+}
+class Game {
+    +#view: View
+    +#model: Model
+    -step(): void
+    +init(): void
+    +ready(): Promise<void>
+    +start(): Promise<void>
+}
+class Main
+Judger --> "1" Snake
+Judger --> "1" Food
+Model --> "1" Snake
+Model --> "1" Stage
+Model --> "1" Food
+Model --> "1" Countdown
+View --> "1" Model
+Controller --> "1" View
+Controller --> "1" Model
+StartButton --> "1" Game
+Game --> "1" View
+Game --> "1" Model
+@enduml
