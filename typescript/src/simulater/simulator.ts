@@ -51,7 +51,7 @@ class Simulator {
       throw new Error('canvas not found');
     }
 
-    this.step();
+    await this.step();
   }
 
   async step(action: Action = 0) {
