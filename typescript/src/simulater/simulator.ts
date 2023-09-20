@@ -1,3 +1,6 @@
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+
 import puppeteer, { Browser, ElementHandle, Page } from 'puppeteer';
 import path from 'path';
 import Model from '../snake-game/ts/model';
