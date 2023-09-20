@@ -113,6 +113,8 @@ class Simulator {
     }
 
     for (let i = 0; i < this.#frameSkip; i++) this.#model.update(isCollisionSelf);
+
+    return {done: this.#model.gameOver, score: this.#model.score, img: await this.ss()}
   }
 
   async close() {
@@ -131,10 +133,6 @@ class Simulator {
     }
     const ss = await this.#canvas.screenshot({ encoding: 'binary' });
     return ss;
-  }
-
-  get done() {
-    return this.#model.gameOver;
   }
 }
 

@@ -16,15 +16,15 @@ const server = Bun.serve<{ authToken: string }>({
     message: async (ws, message) => {
       if (message === '0' || message === '1' || message === '2') {
         const action = Number(message) as Action;
-        await simulator.step(action);
-        const img = await simulator.ss();
-        if (simulator.done) {
-          ws.send(JSON.stringify({ done: true, img }));
+        const state = await simulator.step(action);
+        if (state === undefined) return;
+        if (state.done) {
+          ws.send(JSON.stringify(state));
           await simulator.close();
           ws.close();
           return;
         }
-        ws.send(JSON.stringify({ done: false, img }));
+        ws.send(JSON.stringify(state));
         return;
       }
       ws.send('invalid action\n0: straight, 1: right, 2: left');
