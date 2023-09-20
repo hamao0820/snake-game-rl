@@ -1,7 +1,7 @@
 import Simulator, { Action } from '../simulater/simulator';
 
 const simulator = new Simulator(3);
-await simulator.init(false);
+await simulator.init();
 
 const server = Bun.serve<{ authToken: string }>({
   fetch(req, server) {
@@ -17,13 +17,14 @@ const server = Bun.serve<{ authToken: string }>({
       if (message === '0' || message === '1' || message === '2') {
         const action = Number(message) as Action;
         await simulator.step(action);
+        const img = await simulator.ss();
         if (simulator.done) {
-          ws.send('game over');
+          ws.send(JSON.stringify({ done: true, img }));
           await simulator.close();
           ws.close();
           return;
         }
-        ws.send('0: straight, 1: right, 2: left');
+        ws.send(JSON.stringify({ done: false, img }));
         return;
       }
       ws.send('invalid action\n0: straight, 1: right, 2: left');

@@ -125,6 +125,14 @@ class Simulator {
     return;
   }
 
+  async ss() {
+    if (!this.#canvas) {
+      throw new Error('initialize first.');
+    }
+    const ss = await this.#canvas.screenshot({ encoding: 'binary' });
+    return ss;
+  }
+
   get done() {
     return this.#model.gameOver;
   }
