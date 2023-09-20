@@ -22,7 +22,7 @@ declare const scoreRenderer: {
   render: (score: number) => void;
 };
 
-type Action = 0 | 1 | 2;
+export type Action = 0 | 1 | 2;
 
 class Simulator {
   #browser: Browser | null = null;
@@ -129,6 +129,8 @@ class Simulator {
     return this.#model.gameOver;
   }
 }
+
+export default Simulator;
 
 // (async () => {
 //   const simulator = new Simulator(3);
