@@ -1,7 +1,9 @@
 import asyncio
+import sys
 from typing import Generic, Literal, Tuple, TypeAlias, TypeVar
 
-from websocketClient.websocket_client import Action, WebsocketClient
+sys.path.append("./src/websocketClient")
+from websocket_client import Action, WebsocketClient
 
 Action_Space: TypeAlias = Tuple[Literal[0], Literal[1], Literal[2]]
 ObsType = TypeVar("ObsType")
