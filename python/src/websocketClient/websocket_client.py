@@ -1,8 +1,10 @@
-from websockets import client
 import json
-# import asyncio
+from typing import (Generic, Literal, Tuple, TypeAlias, TypedDict, TypeVar,
+                    Union)
 
-from typing import Union, TypedDict
+from websockets import client
+
+# import asyncio
 
 
 class ImageMessage(TypedDict):
@@ -16,27 +18,15 @@ class Message(TypedDict):
     img: ImageMessage
 
 
-async def f():
-    ws = await client.connect("ws://localhost:8080")
-    print(await ws.recv()) 
-
-    while True:
-        await ws.send("0")
-        message = await ws.recv()
-        data: Message = json.loads(message)
-        if data["done"]:
-            break
-        print(data["score"])
-
-    await ws.close()
-    return
+# 0:straight, 1:left, 2:right
+Action: TypeAlias = Union[Literal[0], Literal[1], Literal[2]]
+ObsType = TypeVar("ObsType")
 
 
-class WebsocketClient:
+class WebsocketClient(Generic[ObsType]):
     def __init__(self) -> None:
         self.__server_address = "ws://localhost:8080"
         self.__ws: Union[client.WebSocketClientProtocol, None] = None
-        self.__message: Union[Message, None] = None
         self.__is_closed: bool = False
 
     async def connect(self) -> None:
@@ -45,15 +35,20 @@ class WebsocketClient:
         print("connected")
         return
 
-    async def send(self, data: Union[str, int]) -> None:
+    async def send(self, data: Union[str, int]):
         if self.__ws is None:
             raise Exception("Not connected to server")
-        print("sending" + str(data))
         await self.__ws.send(str(data))
-        print("sent")
-        self.__message = json.loads(await self.__ws.recv())
-        print("received")
-        return
+        data = json.loads(await self.__ws.recv())
+        return data
+
+    async def reset(self) -> Tuple[ObsType, dict]:
+        data = await self.send("reset")
+        return data["state"], data["info"]
+
+    async def step(self, action: Action) -> Tuple[ObsType, float, bool, bool, dict]:
+        data = await self.send(action)
+        return data["observation"], data["reward"], data["terminated"], data["truncated"], data["info"]
 
     async def close(self) -> None:
         if not self.__ws:
@@ -65,10 +60,6 @@ class WebsocketClient:
     @property
     def is_closed(self) -> bool:
         return self.__is_closed
-
-    @property
-    def message(self) -> Union[Message, None]:
-        return self.__message
 
 
 # if __name__ == "__main__":
