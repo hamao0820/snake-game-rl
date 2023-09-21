@@ -3,7 +3,7 @@ from typing import Any, Generic, Literal, Tuple, TypeAlias, TypedDict, TypeVar, 
 
 from websockets import client
 
-# import asyncio
+import asyncio
 
 
 class ImageMessage(TypedDict):
@@ -40,6 +40,7 @@ class WebsocketClient(Generic[ObsType]):
         self.__server_address = "ws://localhost:8080"
         self.__ws: Union[client.WebSocketClientProtocol, None] = None
         self.__is_closed: bool = False
+        asyncio.set_event_loop(asyncio.new_event_loop())
 
     async def connect(self) -> None:
         self.__ws = await client.connect(self.__server_address)
@@ -67,8 +68,9 @@ class WebsocketClient(Generic[ObsType]):
     async def close(self) -> None:
         if not self.__ws:
             return
-
         await self.__ws.close()
+        self.__is_closed = True
+        asyncio.get_event_loop().close()
         return
 
     @property
