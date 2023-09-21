@@ -1,6 +1,6 @@
 import Simulator, { Action } from '../simulater/simulator';
 
-type Message = { method: 'reset'; data: {} } | { method: 'action'; data: { action: Action } };
+type Message = { method: 'reset'; data: {} } | { method: 'step'; data: { action: Action } };
 
 const simulator = new Simulator(3);
 await simulator.init();
@@ -23,7 +23,7 @@ const server = Bun.serve<{ authToken: string }>({
           ws.send(JSON.stringify({ img }));
           return;
         }
-        case 'action': {
+        case 'step': {
           const action = Number(data.data.action) as Action;
           const state = await simulator.step(action);
           if (state === undefined) return;
