@@ -1,6 +1,17 @@
 import Simulator, { Action } from '../simulater/simulator';
 
 type Message = { method: 'reset'; data: {} } | { method: 'step'; data: { action: Action } };
+type StepResponse = {
+  observation: string | Buffer;
+  reward: number;
+  terminated: boolean;
+  truncated: boolean;
+  info: { [key: string]: string };
+};
+type ResetResponse = {
+  state: string | Buffer;
+  info: { [key: string]: string };
+};
 
 const simulator = new Simulator(3);
 await simulator.init();
@@ -20,20 +31,38 @@ const server = Bun.serve<{ authToken: string }>({
       switch (data.method) {
         case 'reset': {
           const img = await simulator.ss();
-          ws.send(JSON.stringify({ img }));
+          const res: ResetResponse = {
+            state: img,
+            info: {},
+          };
+          ws.send(JSON.stringify(res));
           return;
         }
         case 'step': {
           const action = Number(data.data.action) as Action;
           const state = await simulator.step(action);
-          if (state === undefined) return;
+          if (state === undefined) throw new Error('state is undefined');
           if (state.done) {
-            ws.send(JSON.stringify(state));
+            const res: StepResponse = {
+              observation: state.img,
+              reward: state.getReward ? 0 : -1,
+              terminated: state.done,
+              truncated: false,
+              info: {},
+            };
+            ws.send(JSON.stringify(res));
             await simulator.close();
             ws.close();
             return;
           }
-          ws.send(JSON.stringify(state));
+          const res: StepResponse = {
+            observation: state.img,
+            reward: state.getReward ? 1 : 0,
+            terminated: state.done,
+            truncated: false,
+            info: {},
+          };
+          ws.send(JSON.stringify(res));
           return;
         }
       }

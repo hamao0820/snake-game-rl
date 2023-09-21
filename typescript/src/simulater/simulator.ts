@@ -30,7 +30,7 @@ class Simulator {
   #model: Model;
   #Controller: Controller;
   #canvas: ElementHandle<HTMLCanvasElement> | null = null;
-
+  #prevScore = 0;
   #frameSkip = 3;
   constructor(frameSkip: number) {
     this.#model = new Model();
@@ -114,7 +114,10 @@ class Simulator {
 
     for (let i = 0; i < this.#frameSkip; i++) this.#model.update(isCollisionSelf);
 
-    return {done: this.#model.gameOver, score: this.#model.score, img: await this.ss()}
+    const getReward = this.#prevScore !== this.#model.score;
+    this.#prevScore = this.#model.score;
+
+    return { done: this.#model.gameOver, score: this.#model.score, img: await this.ss(), getReward };
   }
 
   async close() {
