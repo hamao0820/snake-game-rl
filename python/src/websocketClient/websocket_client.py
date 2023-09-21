@@ -1,6 +1,5 @@
 import json
-from typing import (Generic, Literal, Tuple, TypeAlias, TypedDict, TypeVar,
-                    Union)
+from typing import Any, Generic, Literal, Tuple, TypeAlias, TypedDict, TypeVar, Union, cast
 
 from websockets import client
 
@@ -12,15 +11,28 @@ class ImageMessage(TypedDict):
     data: bytes
 
 
-class Message(TypedDict):
-    done: bool
-    score: int
-    img: ImageMessage
+class SendMessage(TypedDict):
+    method: str
+    data: dict
 
+
+class ResetResponse(TypedDict):
+    state: Any
+    info: dict
+
+
+class StepResponse(TypedDict):
+    observation: Any
+    reward: float
+    terminated: bool
+    truncated: bool
+    info: dict
+
+
+ObsType = TypeVar("ObsType")
 
 # 0:straight, 1:left, 2:right
 Action: TypeAlias = Union[Literal[0], Literal[1], Literal[2]]
-ObsType = TypeVar("ObsType")
 
 
 class WebsocketClient(Generic[ObsType]):
@@ -43,11 +55,13 @@ class WebsocketClient(Generic[ObsType]):
         return data
 
     async def reset(self) -> Tuple[ObsType, dict]:
-        data = await self.send("reset")
-        return data["state"], data["info"]
+        send_message: SendMessage = {"method": "reset", "data": {}}
+        data = cast(ResetResponse, await self.send(json.dumps(send_message)))
+        return cast(ObsType, data["state"]), data["info"]
 
     async def step(self, action: Action) -> Tuple[ObsType, float, bool, bool, dict]:
-        data = await self.send(action)
+        send_message: SendMessage = {"method": "step", "data": {"action": action}}
+        data = cast(StepResponse, await self.send(json.dumps(send_message)))
         return data["observation"], data["reward"], data["terminated"], data["truncated"], data["info"]
 
     async def close(self) -> None:
