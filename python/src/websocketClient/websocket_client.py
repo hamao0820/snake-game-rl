@@ -42,35 +42,47 @@ class WebsocketClient(Generic[ObsType]):
         self.__is_closed: bool = False
         asyncio.set_event_loop(asyncio.new_event_loop())
 
-    async def connect(self) -> None:
-        self.__ws = await client.connect(self.__server_address)
-        print(await self.__ws.recv())
-        print("connected")
-        return
+    def connect(self) -> None:
+        async def async_connect():
+            self.__ws = await client.connect(self.__server_address)
+            print(await self.__ws.recv())
+            print("connected")
+            return
 
-    async def send(self, data: Union[str, int]):
+        return asyncio.get_event_loop().run_until_complete(async_connect())
+
+    def send(self, data: Union[str, int]):
         if self.__ws is None:
             raise Exception("Not connected to server")
-        await self.__ws.send(str(data))
-        data = json.loads(await self.__ws.recv())
-        return data
 
-    async def reset(self) -> Tuple[ObsType, dict]:
+        async def async_send():
+            await self.__ws.send(str(data))
+            return json.loads(await self.__ws.recv())
+
+        return asyncio.get_event_loop().run_until_complete(async_send())
+
+    def reset(self) -> Tuple[ObsType, dict]:
         send_message: SendMessage = {"method": "reset", "data": {}}
-        data = cast(ResetResponse, await self.send(json.dumps(send_message)))
-        return cast(ObsType, data["state"]), data["info"]
+        res = cast(ResetResponse, self.send(json.dumps(send_message)))
+        return cast(ObsType, res["state"]), res["info"]
 
-    async def step(self, action: Action) -> Tuple[ObsType, float, bool, bool, dict]:
+    def step(self, action: Action) -> Tuple[ObsType, float, bool, bool, dict]:
         send_message: SendMessage = {"method": "step", "data": {"action": action}}
-        data = cast(StepResponse, await self.send(json.dumps(send_message)))
-        return data["observation"], data["reward"], data["terminated"], data["truncated"], data["info"]
+        res = cast(StepResponse, self.send(json.dumps(send_message)))
+        return res["observation"], res["reward"], res["terminated"], res["truncated"], res["info"]
 
-    async def close(self) -> None:
+    def close(self) -> None:
         if not self.__ws:
             return
-        await self.__ws.close()
-        self.__is_closed = True
+
+        async def async_close():
+            await self.__ws.close()
+            self.__is_closed = True
+            return
+
+        asyncio.get_event_loop().run_until_complete(async_close())
         asyncio.get_event_loop().close()
+
         return
 
     @property
