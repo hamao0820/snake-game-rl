@@ -44,7 +44,7 @@ const server = Bun.serve<{ authToken: string }>({
           if (state === undefined) throw new Error('state is undefined');
           if (state.done) {
             const res: StepResponse = {
-              observation: state.img,
+              observation: state.imageBuffer,
               reward: state.getReward ? 0 : -1,
               terminated: state.done,
               truncated: false,
@@ -56,7 +56,7 @@ const server = Bun.serve<{ authToken: string }>({
             return;
           }
           const res: StepResponse = {
-            observation: state.img,
+            observation: state.imageBuffer,
             reward: state.getReward ? 1 : 0,
             terminated: state.done,
             truncated: false,

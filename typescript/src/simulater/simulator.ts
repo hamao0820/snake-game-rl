@@ -117,7 +117,7 @@ class Simulator {
     const getReward = this.#prevScore !== this.#model.score;
     this.#prevScore = this.#model.score;
 
-    return { done: this.#model.gameOver, score: this.#model.score, img: await this.ss(), getReward };
+    return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), getReward };
   }
 
   async close() {
@@ -130,11 +130,11 @@ class Simulator {
     return;
   }
 
-  async ss() {
+  async ss(): Promise<Buffer> {
     if (!this.#canvas) {
       throw new Error('initialize first.');
     }
-    const ss = await this.#canvas.screenshot({ encoding: 'binary' });
+    const ss = (await this.#canvas.screenshot({ encoding: 'binary' })) as Buffer;
     return ss;
   }
 }

@@ -1,9 +1,8 @@
+import asyncio
 import json
-from typing import Any, Generic, Literal, Tuple, TypeAlias, TypedDict, TypeVar, Union, cast
+from typing import List, Literal, Tuple, TypeAlias, TypedDict, Union, cast
 
 from websockets import client
-
-import asyncio
 
 
 class ImageMessage(TypedDict):
@@ -16,26 +15,29 @@ class SendMessage(TypedDict):
     data: dict
 
 
+class Observation(TypedDict):
+    type: Literal["Buffer"]
+    data: List[int]
+
+
 class ResetResponse(TypedDict):
-    state: Any
+    state: Observation
     info: dict
 
 
 class StepResponse(TypedDict):
-    observation: Any
+    observation: Observation
     reward: float
     terminated: bool
     truncated: bool
     info: dict
 
 
-ObsType = TypeVar("ObsType")
-
 # 0:straight, 1:left, 2:right
 Action: TypeAlias = Union[Literal[0], Literal[1], Literal[2]]
 
 
-class WebsocketClient(Generic[ObsType]):
+class WebsocketClient:
     def __init__(self) -> None:
         self.__server_address = "ws://localhost:8080"
         self.__ws: Union[client.WebSocketClientProtocol, None] = None
@@ -61,12 +63,12 @@ class WebsocketClient(Generic[ObsType]):
 
         return asyncio.get_event_loop().run_until_complete(async_send())
 
-    def reset(self) -> Tuple[ObsType, dict]:
+    def reset(self) -> Tuple[Observation, dict]:
         send_message: SendMessage = {"method": "reset", "data": {}}
         res = cast(ResetResponse, self.send(json.dumps(send_message)))
-        return cast(ObsType, res["state"]), res["info"]
+        return res["state"], res["info"]
 
-    def step(self, action: Action) -> Tuple[ObsType, float, bool, bool, dict]:
+    def step(self, action: Action) -> Tuple[Observation, float, bool, bool, dict]:
         send_message: SendMessage = {"method": "step", "data": {"action": action}}
         res = cast(StepResponse, self.send(json.dumps(send_message)))
         return res["observation"], res["reward"], res["terminated"], res["truncated"], res["info"]
