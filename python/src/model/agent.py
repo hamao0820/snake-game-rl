@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -15,71 +16,52 @@ class DQNAgent:
         self.epsilon = 0.1
         self.buffer_size = 10000
         self.batch_size = 32
-        self.action_size = 2
+        self.action_size = 3
 
         self.replay_buffer = ReplayBuffer(self.buffer_size, self.batch_size)
         self.qnet = QNet(self.action_size)
         self.qnet_target = QNet(self.action_size)
         self.optimizer = optim.Adam(self.qnet.parameters(), lr=self.lr)
 
-    # 同期メソッド
-    def sync_qnet(self):
-        # Q関数NNとターゲットNNを同期
+    def sync_qnet(self) -> None:
         self.qnet_target = copy.deepcopy(self.qnet)
 
-    # 行動メソッドの定義
-    def get_action(self, state):
-        # ε-greedy法により行動を決定:式(6.11)
+    def get_action(self, state: np.ndarray) -> int:
         if np.random.rand() < self.epsilon:
-            # ランダムに行動を出力
             return np.random.choice(self.action_size)
         else:
-            # 2次元配列に変換
             state = state[np.newaxis, :]
 
-            # 現在の状態における行動価値(Q関数NNの順伝播)を計算
-            qs = self.qnet(state)
+            qs = self.qnet(torch.from_numpy(state))
 
-            # 行動価値が最大の行動を出力
-            return qs.data.argmax()
+            return qs.data.argmax().item()
 
-    # 更新メソッドの定義
-    def update(self, state, action, reward, next_state, done):
-        # サンプルデータを保存
+    def update(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool) -> float:
         self.replay_buffer.add(state, action, reward, next_state, done)
 
-        # サンプルデータが足りない場合は更新しない
         if len(self.replay_buffer) < self.batch_size:
-            return None
+            return 0
 
-        # ミニバッチデータを取得
         state, action, reward, next_state, done = self.replay_buffer.get_batch()
 
-        # サンプルごとに現在の状態・行動の行動価値(Q関数NNの順伝播)を計算
-        qs = self.qnet(state)  # 全ての行動
-        q = qs[np.arange(self.batch_size), action]  # 各行動
+        qs = self.qnet(torch.from_numpy(state))
+        q = qs[np.arange(self.batch_size), action]
 
-        # サンプルごとに次の状態の行動価値(ターゲットNNの順伝播)の最大値を計算
-        next_qs = self.qnet_target(next_state)  # 全ての行動
-        next_q = next_qs.max(axis=1)  # 最大値の行動
+        next_qs = self.qnet_target(torch.from_numpy(next_state))
+        next_q = torch.max(next_qs, dim=1, keepdim=True).values.detach().squeeze()
 
-        # 勾配の計算から除外
-        next_q.unchain()
+        target = torch.tensor(reward) + (1 - torch.tensor(done)) * self.gamma * next_q
 
-        # ターゲット(正解ラベル)を計算
-        target = reward + (1 - done) * self.gamma * next_q
+        loss = F.mse_loss(q, target)
 
-        # 損失関数(損失レイヤの順伝播)を計算
-        loss = nn.mean_squared_error(q, target)
+        self.qnet.zero_grad()
 
-        # 勾配を初期化
-        self.qnet.cleargrads()
-
-        # パラメータの勾配(逆伝播)を計算
         loss.backward()
 
-        # 勾配降下法によりQ関数NNのパラメータを更新
-        self.optimizer.update()
+        self.optimizer.step()
 
-        # 損失を出力
-        return loss.data
+        return loss.data.item()
+
+    def save(self, name: str = "dqn_weight") -> None:
+        torch.save(self.qnet.state_dict(), "model_weights/" + name + ".pth")
+        torch.save(self.qnet_target.state_dict(), "model_weights/" + name + "_target" + ".pth")
