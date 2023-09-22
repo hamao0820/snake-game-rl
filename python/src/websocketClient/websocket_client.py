@@ -69,7 +69,7 @@ class WebsocketClient:
         return res["state"], res["info"]
 
     def step(self, action: Action) -> Tuple[Observation, float, bool, bool, dict]:
-        send_message: SendMessage = {"method": "step", "data": {"action": action}}
+        send_message: SendMessage = {"method": "step", "data": {"action": str(action)}}
         res = cast(StepResponse, self.send(json.dumps(send_message)))
         return res["observation"], res["reward"], res["terminated"], res["truncated"], res["info"]
 
