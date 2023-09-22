@@ -8,14 +8,14 @@ class QNet(nn.Module):
         number_of_outputs = 3
         self.normalize_image = normalize_image
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=8, stride=4)
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1)
 
-        self.advantage1 = nn.Linear(73984, hidden_layer)
+        self.advantage1 = nn.Linear(28800, hidden_layer)
         self.advantage2 = nn.Linear(hidden_layer, number_of_outputs)
 
-        self.value1 = nn.Linear(73984, hidden_layer)
+        self.value1 = nn.Linear(28800, hidden_layer)
         self.value2 = nn.Linear(hidden_layer, 1)
 
         self.flatten = nn.Flatten()

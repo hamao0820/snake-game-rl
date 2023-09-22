@@ -50,7 +50,7 @@ for episode in range(episodes):
         + ", T="
         + str(t)
         + ", average loss="
-        + str(np.round(total_loss / t, 3))
+        + str(np.round(total_loss / t, 5))
         + ", total reward="
         + str(total_reward)
     )
