@@ -30,6 +30,7 @@ const server = Bun.serve<{ authToken: string }>({
       const data = JSON.parse(String(message)) as Message;
       switch (data.method) {
         case 'reset': {
+          await simulator.reset();
           const img = await simulator.ss();
           const res: ResetResponse = {
             state: img,
@@ -51,8 +52,6 @@ const server = Bun.serve<{ authToken: string }>({
               info: {},
             };
             ws.send(JSON.stringify(res));
-            await simulator.close();
-            ws.close();
             return;
           }
           const res: StepResponse = {
@@ -73,6 +72,7 @@ const server = Bun.serve<{ authToken: string }>({
     },
     close: async (ws) => {
       console.log('close');
+      ws.close();
       server.stop();
       await simulator.close();
     },

@@ -54,6 +54,17 @@ class Simulator {
     await this.step();
   }
 
+  async reset() {
+    if (!this.#page) {
+      throw new Error('initialize first.');
+    }
+    this.#model = new Model();
+    this.#Controller = new Controller(this.#model);
+    this.#prevScore = 0;
+    
+    await this.step();
+  }
+
   async step(action: Action = 0) {
     if (!this.#page) {
       throw new Error('initialize first.');
