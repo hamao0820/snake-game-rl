@@ -1,6 +1,6 @@
 import io
 import sys
-from typing import Literal, Tuple, TypeAlias
+from typing import List, Literal, Tuple, TypeAlias
 
 import numpy as np
 import PIL.Image as Image
@@ -16,20 +16,33 @@ class SnakeGameEnv:
         self.__client = WebsocketClient()
         self.__action_space: Action_Space = (0, 1, 2)
         self.__client.connect()
+        self.__frames: List[np.ndarray] = []
         return
 
     def reset(self) -> Tuple[np.ndarray, dict]:
         state, info = self.__client.reset()
         image_arr = np.array(Image.open(io.BytesIO(bytes(state["data"]))).convert("RGB"))
+        self.__frames = [image_arr]
         return image_arr, info
 
     def step(self, action: Action) -> Tuple[np.ndarray, float, bool, bool, dict]:
         observation, reward, terminated, truncated, info = self.__client.step(action)
         image_arr = np.array(Image.open(io.BytesIO(bytes(observation["data"]))).convert("RGB"))
+        self.__frames.append(image_arr)
         return image_arr, reward, terminated, truncated, info
 
     def close(self) -> None:
         self.__client.close()
+
+    def render(self, path: str = "img/snake-game.gif") -> None:
+        images = [Image.fromarray(frame) for frame in self.__frames]
+        images[0].save(
+            path,
+            save_all=True,
+            append_images=images[1:],
+            duration=100,
+            loop=0,
+        )
 
     @property
     def action_space(self) -> Action_Space:
