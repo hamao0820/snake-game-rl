@@ -71,9 +71,10 @@ const server = Bun.serve<{ authToken: string }>({
       ws.send('0: straight, 1: right, 2: left');
       console.log('open');
     },
-    close: (ws) => {
+    close: async (ws) => {
       console.log('close');
       server.stop();
+      await simulator.close();
     },
     drain: (ws) => {
       console.log('drain');
