@@ -8,15 +8,17 @@ class QNet(nn.Module):
         number_of_outputs = 3
         self.normalize_image = normalize_image
 
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=8, stride=4)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=8, stride=4)
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
 
-        self.advantage1 = nn.Linear(7 * 7 * 64, hidden_layer)
+        self.advantage1 = nn.Linear(73984, hidden_layer)
         self.advantage2 = nn.Linear(hidden_layer, number_of_outputs)
 
-        self.value1 = nn.Linear(7 * 7 * 64, hidden_layer)
+        self.value1 = nn.Linear(73984, hidden_layer)
         self.value2 = nn.Linear(hidden_layer, 1)
+
+        self.flatten = nn.Flatten()
 
         # self.activation = nn.Tanh()
         self.activation = nn.ReLU()
@@ -33,7 +35,7 @@ class QNet(nn.Module):
         output_conv = self.conv3(output_conv)
         output_conv = self.activation(output_conv)
 
-        output_conv = output_conv.view(output_conv.size(0), -1)  # flatten
+        output_conv = self.flatten(output_conv)
 
         output_advantage = self.advantage1(output_conv)
         output_advantage = self.activation(output_advantage)
