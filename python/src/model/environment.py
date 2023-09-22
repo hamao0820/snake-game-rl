@@ -23,13 +23,13 @@ class SnakeGameEnv:
         state, info = self.__client.reset()
         image_arr = np.array(Image.open(io.BytesIO(bytes(state["data"]))).convert("RGB"))
         self.__frames = [image_arr]
-        return image_arr, info
+        return np.transpose(image_arr, (2, 0, 1)), info
 
     def step(self, action: Action) -> Tuple[np.ndarray, float, bool, bool, dict]:
         observation, reward, terminated, truncated, info = self.__client.step(action)
         image_arr = np.array(Image.open(io.BytesIO(bytes(observation["data"]))).convert("RGB"))
         self.__frames.append(image_arr)
-        return image_arr, reward, terminated, truncated, info
+        return np.transpose(image_arr, (2, 0, 1)), reward, terminated, truncated, info
 
     def close(self) -> None:
         self.__client.close()
