@@ -56,7 +56,7 @@ const server = Bun.serve<{ authToken: string }>({
           }
           const res: StepResponse = {
             observation: state.imageBuffer,
-            reward: state.getReward ? 1 : 0,
+            reward: state.getReward ? 1 : 0.01,
             terminated: state.done,
             truncated: false,
             info: {},
