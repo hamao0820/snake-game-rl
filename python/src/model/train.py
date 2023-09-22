@@ -7,9 +7,9 @@ from environment import SnakeGameEnv
 env = SnakeGameEnv()
 agent = DQNAgent()
 
-episodes = 300
+episodes = 500
 
-sync_interval = 20
+sync_interval = 5
 
 trace_loss: List[float] = []
 trace_reward: List[float] = []

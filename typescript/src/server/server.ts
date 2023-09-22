@@ -43,20 +43,9 @@ const server = Bun.serve<{ authToken: string }>({
           const action = Number(data.data.action) as Action;
           const state = await simulator.step(action);
           if (state === undefined) throw new Error('state is undefined');
-          if (state.done) {
-            const res: StepResponse = {
-              observation: state.imageBuffer,
-              reward: state.getReward ? 0 : -1,
-              terminated: state.done,
-              truncated: false,
-              info: {},
-            };
-            ws.send(JSON.stringify(res));
-            return;
-          }
           const res: StepResponse = {
             observation: state.imageBuffer,
-            reward: state.getReward ? 3 : 0.05,
+            reward: state.reward,
             terminated: state.done,
             truncated: false,
             info: {},

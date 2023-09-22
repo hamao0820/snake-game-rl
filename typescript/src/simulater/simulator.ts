@@ -61,7 +61,7 @@ class Simulator {
     this.#model = new Model();
     this.#Controller = new Controller(this.#model);
     this.#prevScore = 0;
-    
+
     await this.step();
   }
 
@@ -123,12 +123,28 @@ class Simulator {
       }
     }
 
+    const pFood = this.#model.food;
+    const pMx = this.#model.snake.mx;
+    const pMy = this.#model.snake.my;
     for (let i = 0; i < this.#frameSkip; i++) this.#model.update(isCollisionSelf);
+    const cFood = this.#model.food;
+    const cMx = this.#model.snake.mx;
+    const cMy = this.#model.snake.my;
 
-    const getReward = this.#prevScore !== this.#model.score;
+    // 近づいたかどうか判定
+    const pDistance = pFood ? (pFood.x - pMx) ** 2 + (pFood.y - pMy) ** 2 : 0;
+    const cDistance = cFood ? (cFood.x - cMx) ** 2 + (cFood.y - cMy) ** 2 : 0;
+    const closerFood = pDistance > cDistance;
+
+    const getFood = this.#prevScore !== this.#model.score;
     this.#prevScore = this.#model.score;
 
-    return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), getReward };
+    let reward = 0;
+    if (this.#model.gameOver) reward = -3;
+    if (closerFood) reward += pDistance > cDistance ? 0.1 : -0.1;
+    if (getFood) reward += 5;
+
+    return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
   }
 
   async close() {

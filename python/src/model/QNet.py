@@ -9,13 +9,16 @@ class QNet(nn.Module):
         self.normalize_image = normalize_image
 
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=8, stride=4)
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2)
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv3 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1)
+        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.advantage1 = nn.Linear(28800, hidden_layer)
+        self.advantage1 = nn.Linear(512, hidden_layer)
         self.advantage2 = nn.Linear(hidden_layer, number_of_outputs)
 
-        self.value1 = nn.Linear(28800, hidden_layer)
+        self.value1 = nn.Linear(512, hidden_layer)
         self.value2 = nn.Linear(hidden_layer, 1)
 
         self.flatten = nn.Flatten()
@@ -29,11 +32,11 @@ class QNet(nn.Module):
 
         output_conv = self.conv1(x)
         output_conv = self.activation(output_conv)
-
+        output_conv = self.pool1(output_conv)
         output_conv = self.conv2(output_conv)
         output_conv = self.activation(output_conv)
+        output_conv = self.pool2(output_conv)
         output_conv = self.conv3(output_conv)
-        output_conv = self.activation(output_conv)
 
         output_conv = self.flatten(output_conv)
 
