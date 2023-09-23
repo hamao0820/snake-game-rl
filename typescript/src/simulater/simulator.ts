@@ -11,7 +11,7 @@ declare const view: {
   render: (
     positionList: [number, number][],
     gameOver: boolean,
-    food: { x: number; y: number } | null,
+    foods: { x: number; y: number }[],
     mx: number,
     my: number,
     angle: number
@@ -74,7 +74,7 @@ class Simulator {
       [
         positionList: [number, number][],
         gameOver: boolean,
-        food: { x: number; y: number } | null,
+        foods: { x: number; y: number }[],
         mx: number,
         my: number,
         angle: number,
@@ -84,13 +84,13 @@ class Simulator {
       (
         positionList: [number, number][],
         gameOver: boolean,
-        food: { x: number; y: number } | null,
+        foods: { x: number; y: number }[],
         mx: number,
         my: number,
         angle: number,
         score: number
       ) => {
-        view.render(positionList, gameOver, food, mx, my, angle);
+        view.render(positionList, gameOver, foods, mx, my, angle);
         scoreRenderer.render(score);
         const tx = mx + Math.cos((angle * Math.PI) / 180) * (8 + 2);
         const ty = my + Math.sin((angle * Math.PI) / 180) * (8 + 2);
@@ -100,7 +100,7 @@ class Simulator {
       },
       this.#model.snake.positionList,
       this.#model.gameOver,
-      this.#model.food,
+      this.#model.foods,
       this.#model.snake.mx,
       this.#model.snake.my,
       this.#model.snake.angle,
@@ -123,28 +123,13 @@ class Simulator {
       }
     }
 
-    const pFood = this.#model.food;
-    const pMx = this.#model.snake.mx;
-    const pMy = this.#model.snake.my;
     for (let i = 0; i < this.#frameSkip; i++) this.#model.update(isCollisionSelf);
-    const cFood = this.#model.food;
-    const cMx = this.#model.snake.mx;
-    const cMy = this.#model.snake.my;
-
-    // 近づいたかどうか判定
-    const pDistance = pFood ? (pFood.x - pMx) ** 2 + (pFood.y - pMy) ** 2 : 0;
-    const cDistance = cFood ? (cFood.x - cMx) ** 2 + (cFood.y - cMy) ** 2 : 0;
-    const closerFood = pDistance > cDistance;
-
-    const getFood = this.#prevScore !== this.#model.score;
-    this.#prevScore = this.#model.score;
 
     let reward = 0;
-    if (this.#model.gameOver) reward = -3;
-    if (isCollisionSelf) reward -= 0.5;
-    if (closerFood) reward += pDistance > cDistance ? 0.1 : -0.1;
-    if (getFood) reward += 5;
-    reward -= 0.01;
+    if (this.#model.gameOver) reward = -0.1;
+    reward += (this.#model.score - this.#prevScore) * 0.03;
+    this.#prevScore = this.#model.score;
+    reward -= 0.003;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
   }

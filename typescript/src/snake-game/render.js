@@ -70,11 +70,11 @@ class View {
     this.#ctx.fill();
     this.#ctx.closePath();
   }
-  render(positionList, gameOver, food, mx, my, angle) {
+  render(positionList, gameOver, foods, mx, my, angle) {
     this.renderStage();
     this.renderSnake(positionList, gameOver);
     this.renderSnakeEye(mx, my, angle);
-    this.renderFood(food);
+    for (const food of foods) this.renderFood(food);
   }
   get ctx() {
     return this.#ctx;

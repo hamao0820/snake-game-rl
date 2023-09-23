@@ -8,26 +8,33 @@ class Model {
   readonly #snake: Snake;
   readonly #stage: Stage;
   readonly #score: Score;
-  #food: Food | null = null;
+  #foods: Food[] = [];
   #gameOver = false;
   #turnAngle = 0;
   constructor() {
     this.#snake = new Snake();
     this.#stage = new Stage();
     this.#score = new Score();
-    this.#food = this.createFood();
+    this.#foods = Array.from({ length: 5 }, () => this.createFood());
   }
 
   update(isCollisionSelf: boolean) {
     this.#snake.turn(this.#turnAngle);
     this.#snake.move();
 
-    if (this.#food && Judger.checkCollisionFood(this.#snake, this.#food)) {
-      this.#food = this.createFood();
-      this.#snake.grow();
-      this.#score.addScore();
-      return;
+    const eatenFoodIndex = [];
+    for (let i = 0; i < this.#foods.length; i++) {
+      if (Judger.checkCollisionFood(this.#snake, this.#foods[i])) {
+        eatenFoodIndex.push(i);
+      }
     }
+
+    for (const eatenIndex of eatenFoodIndex) {
+      this.#foods[eatenIndex] = this.createFood();
+      this.#score.addScore();
+      this.snake.grow();
+    }
+
     if (Judger.checkCollisionWall(this.#snake) || isCollisionSelf) {
       this.#gameOver = true;
     }
@@ -51,8 +58,8 @@ class Model {
     return this.#stage;
   }
 
-  get food() {
-    return this.#food;
+  get foods() {
+    return this.#foods;
   }
 
   get gameOver() {
