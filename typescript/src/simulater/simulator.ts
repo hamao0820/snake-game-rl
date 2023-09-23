@@ -127,9 +127,9 @@ class Simulator {
 
     let reward = 0;
     if (this.#model.gameOver) reward = -0.1;
+    if (isCollisionSelf) reward = -0.4;
     reward += (this.#model.score - this.#prevScore) * 0.03;
     this.#prevScore = this.#model.score;
-    reward -= 0.003;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
   }
