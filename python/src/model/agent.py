@@ -14,7 +14,7 @@ class DQNAgent:
         self.gamma = 0.98
         self.lr = 0.0005
         self.epsilon = 0.3
-        self.buffer_size = 10000
+        self.buffer_size = 300
         self.batch_size = 32
         self.action_size = 3
 

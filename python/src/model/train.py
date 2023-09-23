@@ -9,7 +9,7 @@ agent = DQNAgent()
 
 episodes = 500
 
-sync_interval = 5
+sync_interval = 10
 
 trace_loss: List[float] = []
 trace_reward: List[float] = []

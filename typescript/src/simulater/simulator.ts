@@ -141,8 +141,10 @@ class Simulator {
 
     let reward = 0;
     if (this.#model.gameOver) reward = -3;
+    if (isCollisionSelf) reward -= 0.5;
     if (closerFood) reward += pDistance > cDistance ? 0.1 : -0.1;
     if (getFood) reward += 5;
+    reward -= 0.01;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
   }
