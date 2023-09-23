@@ -3,9 +3,12 @@ from typing import List
 import numpy as np
 from agent import DQNAgent
 from environment import SnakeGameEnv
+import torch
+
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
 env = SnakeGameEnv()
-agent = DQNAgent()
+agent = DQNAgent(device=device)
 
 episodes = 500
 

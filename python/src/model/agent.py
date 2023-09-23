@@ -10,7 +10,7 @@ from replay_buffer import ReplayBuffer
 
 
 class DQNAgent:
-    def __init__(self):
+    def __init__(self, device: torch.device):
         self.gamma = 0.98
         self.lr = 0.0005
         self.epsilon = 0.3
@@ -18,13 +18,17 @@ class DQNAgent:
         self.batch_size = 32
         self.action_size = 3
 
+        self.device = device
+
         self.replay_buffer = ReplayBuffer(self.buffer_size, self.batch_size)
-        self.qnet = QNet(self.action_size)
+        self.qnet = QNet(self.action_size).to(self.device)
+        self.qnet.to(self.device)
         self.qnet_target = QNet(self.action_size)
+        self.qnet_target.to(self.device)
         self.optimizer = optim.Adam(self.qnet.parameters(), lr=self.lr)
 
     def sync_qnet(self) -> None:
-        self.qnet_target = copy.deepcopy(self.qnet)
+        self.qnet_target = copy.deepcopy(self.qnet).to(self.device)
 
     def get_action(self, state: np.ndarray) -> int:
         if np.random.rand() < self.epsilon:
@@ -32,7 +36,7 @@ class DQNAgent:
         else:
             state = state[np.newaxis, :]
 
-            qs = self.qnet(torch.from_numpy(state))
+            qs = self.qnet(torch.from_numpy(state).to(self.device))
 
             return qs.data.argmax().item()
 
@@ -42,17 +46,20 @@ class DQNAgent:
         if len(self.replay_buffer) < self.batch_size:
             return 0
 
-        state, action, reward, next_state, done = self.replay_buffer.get_batch()
+        state_batch, action_batch, reward_batch, next_state_batch, done_batch = self.replay_buffer.get_batch()
 
-        qs = self.qnet(torch.from_numpy(state))
-        q = qs[np.arange(self.batch_size), action]
+        qs = self.qnet(torch.from_numpy(state_batch).to(self.device))
+        q = qs[np.arange(self.batch_size), action_batch]
 
-        next_qs = self.qnet_target(torch.from_numpy(next_state))
-        next_q = torch.max(next_qs, dim=1, keepdim=True).values.detach().squeeze()
+        next_qs = self.qnet_target(torch.from_numpy(next_state_batch).to(self.device))
+        next_q = torch.max(next_qs, dim=1, keepdim=True).values.detach().squeeze().to(self.device)
 
-        target = torch.tensor(reward) + (1 - torch.tensor(done)) * self.gamma * next_q
+        target = (
+            torch.tensor(reward_batch).to(self.device)
+            + (1 - torch.tensor(done_batch).to(self.device)) * self.gamma * next_q
+        )
 
-        loss = F.mse_loss(q, target)
+        loss = F.mse_loss(q, target).to(self.device)
 
         self.qnet.zero_grad()
 
