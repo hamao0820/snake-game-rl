@@ -1,25 +1,28 @@
 import torch.nn as nn
+from UNet import UNet
 
 
 class QNet(nn.Module):
-    def __init__(self, hidden_layer=512, normalize_image=True) -> None:
+    def __init__(self, normalize_image=True) -> None:
         super(QNet, self).__init__()
 
         number_of_outputs = 3
         self.normalize_image = normalize_image
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=8, stride=4)
+        self.unet = UNet(3, 3)
+
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1)
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2)
-        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv3 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1)
-        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv4 = nn.Conv2d(in_channels=128, out_channels=512, kernel_size=3, stride=1)
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.advantage1 = nn.Linear(512, hidden_layer)
-        self.advantage2 = nn.Linear(hidden_layer, number_of_outputs)
+        self.advantage1 = nn.Linear(73728, 128)
+        self.advantage2 = nn.Linear(128, number_of_outputs)
 
-        self.value1 = nn.Linear(512, hidden_layer)
-        self.value2 = nn.Linear(hidden_layer, 1)
+        self.value1 = nn.Linear(73728, 128)
+        self.value2 = nn.Linear(128, 1)
 
         self.flatten = nn.Flatten()
 
@@ -30,7 +33,9 @@ class QNet(nn.Module):
         if self.normalize_image:
             x = x / 255
 
-        output_conv = self.conv1(x)
+        output_unet = self.unet(x)
+
+        output_conv = self.conv1(output_unet)
         output_conv = self.activation(output_conv)
         output_conv = self.pool1(output_conv)
         output_conv = self.conv2(output_conv)
