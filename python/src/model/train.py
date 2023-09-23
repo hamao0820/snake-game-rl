@@ -1,66 +1,86 @@
 from typing import List
 
-import numpy as np
-from agent import DQNAgent
-from environment import SnakeGameEnv
+import cv2
+import matplotlib.pyplot as plt
 import torch
+from environment import SnakeGameEnv
 
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+resize_image = 84
+
+
+def to_resize_gray(image, resize):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.resize(src=image, dsize=(resize, resize)) / 255.0  # 画像のリサイズと値の変換0～1
+    image = torch.tensor(image, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+    return image
+
 
 env = SnakeGameEnv()
-agent = DQNAgent(device=device)
+state, info = env.reset()
+print(state.shape)
+plt.imshow(state)
+plt.show()
+state = to_resize_gray(state, resize_image)
+print(state.shape)
+plt.imshow(state[0, 0], cmap="gray")
+plt.show()
 
-episodes = 500
+# device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-sync_interval = 10
+# env = SnakeGameEnv()
+# agent = DQNAgent(device=device)
 
-trace_loss: List[float] = []
-trace_reward: List[float] = []
+# episodes = 500
 
-for episode in range(episodes):
-    state, info = env.reset()
-    done = False
+# sync_interval = 10
 
-    t = 0
+# trace_loss: List[float] = []
+# trace_reward: List[float] = []
 
-    total_loss = 0.0
-    total_reward = 0.0
+# for episode in range(episodes):
+#     state, info = env.reset()
+#     done = False
 
-    while not done:
-        t += 1
+#     t = 0
 
-        action = agent.get_action(state)
+#     total_loss = 0.0
+#     total_reward = 0.0
 
-        next_state, reward, done, truncated, info = env.step(action)
+#     while not done:
+#         t += 1
 
-        loss = agent.update(state, action, reward, next_state, done)
+#         action = agent.get_action(state)
 
-        state = next_state
+#         next_state, reward, done, truncated, info = env.step(action)
 
-        if not len(agent.replay_buffer) < agent.batch_size:
-            total_loss += loss
-        total_reward += reward
+#         loss = agent.update(state, action, reward, next_state, done)
 
-    if episode % sync_interval == 0:
-        agent.sync_qnet()
+#         state = next_state
 
-    trace_loss.append(total_loss / t)
-    trace_reward.append(total_reward)
+#         if not len(agent.replay_buffer) < agent.batch_size:
+#             total_loss += loss
+#         total_reward += reward
 
-    print(
-        "episode "
-        + str(episode + 1)
-        + ", T="
-        + str(t)
-        + ", average loss="
-        + str(np.round(total_loss / t, 5))
-        + ", total reward="
-        + str(total_reward)
-    )
-    if (episode + 1) % 5 == 0:
-        agent.save(f"{episode + 1}_dqn_weight")
-        env.render(f"img/{episode + 1}_snake-game.gif")
+#     if episode % sync_interval == 0:
+#         agent.sync_qnet()
 
-agent.save()
+#     trace_loss.append(total_loss / t)
+#     trace_reward.append(total_reward)
 
-env.close()
+#     print(
+#         "episode "
+#         + str(episode + 1)
+#         + ", T="
+#         + str(t)
+#         + ", average loss="
+#         + str(np.round(total_loss / t, 5))
+#         + ", total reward="
+#         + str(total_reward)
+#     )
+#     if (episode + 1) % 5 == 0:
+#         agent.save(f"{episode + 1}_dqn_weight")
+#         env.render(f"img/{episode + 1}_snake-game.gif")
+
+# agent.save()
+
+# env.close()
