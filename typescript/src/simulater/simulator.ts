@@ -39,6 +39,7 @@ class Simulator {
   }
 
   async init(headless: boolean | 'new' = 'new') {
+    this.close();
     this.#browser = await puppeteer.launch({ headless });
     this.#page = await this.#browser.newPage();
 
@@ -50,8 +51,6 @@ class Simulator {
     if (!this.#canvas) {
       throw new Error('canvas not found');
     }
-
-    await this.step();
   }
 
   async reset() {
@@ -135,6 +134,9 @@ class Simulator {
   }
 
   async close() {
+    if (this.#page) {
+      await this.#page.close();
+    }
     if (this.#browser) {
       await this.#browser.close();
     }
@@ -148,8 +150,17 @@ class Simulator {
     if (!this.#canvas) {
       throw new Error('initialize first.');
     }
-    const ss = (await this.#canvas.screenshot({ encoding: 'binary' })) as Buffer;
-    return ss;
+    try {
+      const ss = (await this.#canvas.screenshot({ encoding: 'binary' })) as Buffer;
+      return ss;
+    } catch (e) {
+      console.error(e);
+      console.log('retrying...');
+      await this.init();
+      console.log('retried')
+      const ss = (await this.#canvas.screenshot({ encoding: 'binary' })) as Buffer;
+      return ss;
+    }
   }
 }
 
