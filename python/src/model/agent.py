@@ -77,6 +77,6 @@ class DQNAgent:
             )
         self.target_net.load_state_dict(target_net_state_dict)
 
-    def save(self, fname: str) -> None:
+    def save(self, fname: str = "snake-game") -> None:
         torch.save(self.target_net.state_dict(), f"model_weights/{fname}_target.pth")
         torch.save(self.policy_net.state_dict(), f"model_weights/{fname}_policy.pth")
