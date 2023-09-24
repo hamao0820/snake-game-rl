@@ -4,3 +4,4 @@ node_modules
 __pycache__
 python/img
 python/model_weights
+python/progress
