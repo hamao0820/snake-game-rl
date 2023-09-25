@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Tuple
+from typing import Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -20,9 +20,12 @@ class DQNAgent:
     TAU = 0.005
     LR = 1e-4
 
-    def __init__(self, n_frame: int, device: torch.device):
+    def __init__(self, n_frame: int, device: torch.device, state_dict_path: Union[str, None] = None):
         self.policy_net = Dueling_Network(n_frame=n_frame, n_actions=self.N_ACTIONS).to(device)
         self.target_net = Dueling_Network(n_frame=n_frame, n_actions=self.N_ACTIONS).to(device)
+        if state_dict_path is not None:
+            self.policy_net.load_state_dict(torch.load(state_dict_path))
+        self.target_net.load_state_dict(self.policy_net.state_dict())
         self.device = device
         self.memory = ReplayMemory(self.SIZE_REPLAY_MEMORY)
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.LR, amsgrad=True)
