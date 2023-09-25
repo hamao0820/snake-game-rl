@@ -1,5 +1,5 @@
 class Stage {
-  static readonly Size = 300;
+  static readonly Size = 150;
 }
 
 export default Stage;
