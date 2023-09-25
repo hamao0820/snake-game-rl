@@ -125,9 +125,8 @@ class Simulator {
     for (let i = 0; i < this.#frameSkip; i++) this.#model.update(isCollisionSelf);
 
     let reward = 0;
-    if (this.#model.gameOver) reward = -0.1;
-    if (isCollisionSelf) reward = -0.4;
-    reward += (this.#model.score - this.#prevScore) * 0.03;
+    if (this.#model.gameOver) reward = -1;
+    reward += (this.#model.score - this.#prevScore) * 0.05;
     this.#prevScore = this.#model.score;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
@@ -157,7 +156,7 @@ class Simulator {
       console.error(e);
       console.log('retrying...');
       await this.init();
-      console.log('retried')
+      console.log('retried');
       const ss = (await this.#canvas.screenshot({ encoding: 'binary' })) as Buffer;
       return ss;
     }
