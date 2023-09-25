@@ -29,7 +29,7 @@ def to_resize_gray(image: np.ndarray, resize: int) -> torch.Tensor:
 
 env = SnakeGameEnv()
 n_actions = env.action_space.n
-agent = DQNAgent(n_frame=n_frame, device=device)
+agent = DQNAgent(n_frame=n_frame, device=device, state_dict_path="model_weights/9/snake-game_policy.pth")
 
 terminated = True
 frame1 = True
