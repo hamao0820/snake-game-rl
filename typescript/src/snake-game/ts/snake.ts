@@ -1,7 +1,7 @@
 import Stage from './stage';
 
 class Snake {
-  static readonly initialLength = 100;
+  static readonly initialLength = 130;
   static readonly halfWidth = 8;
   readonly #positionList: [number, number][] = [];
   #mx = Stage.Size / 2;
@@ -28,7 +28,7 @@ class Snake {
 
   grow() {
     const tailPosition = this.#positionList[0];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 24; i++) {
       this.#positionList.unshift(tailPosition);
     }
   }
