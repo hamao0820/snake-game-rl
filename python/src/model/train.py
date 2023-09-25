@@ -102,12 +102,12 @@ for i_episode in tqdm(range(num_episodes)):
             np.arange(0, (i_episode / num_episode_plot + 1) * num_episode_plot, num_episode_plot),
             torch.tensor(reward_durations, dtype=torch.float).numpy(),
         )
-        plt.savefig(f"progress/{i_episode}.png")
+        plt.savefig(f"progress/reward_duration.png")
         plt.clf()
 
         if (i_episode % num_episode_save) == 0:
-            agent.save(str(i_episode))
-            env.render(str(i_episode))
+            agent.save()
+            env.render()
 
 agent.save()
 env.close()
