@@ -1,4 +1,4 @@
-const STAGE_SIZE = 240;
+const STAGE_SIZE = 300;
 const SNAKE_HALF_WIDTH = 8;
 class ScoreRenderer {
   #element;
