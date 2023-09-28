@@ -68,7 +68,6 @@ class Simulator {
     if (!this.#page) {
       throw new Error('initialize first.');
     }
-    await new Promise((r) => setTimeout(r, 10 * this.#frameSkip));
     const isCollisionSelf = (await this.#page.evaluate<
       [
         positionList: [number, number][],
