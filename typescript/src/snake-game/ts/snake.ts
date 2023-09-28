@@ -8,6 +8,8 @@ class Snake {
   #my = (Stage.Size * 4) / 5;
   #speed = 1;
   #angle = -90;
+  #maxHP = 100;
+  #hp = this.#maxHP;
 
   constructor() {
     for (let i = 0; i < Snake.initialLength; i++) {
@@ -24,6 +26,7 @@ class Snake {
     this.#my += this.#speed * Math.sin((this.#angle * Math.PI) / 180);
     this.#positionList.push([this.#mx, this.#my]);
     this.#positionList.shift();
+    if (this.#hp > 0) this.#hp--;
   }
 
   grow() {
@@ -31,6 +34,8 @@ class Snake {
     for (let i = 0; i < 30; i++) {
       this.#positionList.unshift(tailPosition);
     }
+    this.#maxHP += 15;
+    this.#hp = this.#maxHP;
   }
 
   get positionList() {
@@ -47,6 +52,10 @@ class Snake {
 
   get my() {
     return this.#my;
+  }
+
+  get hp() {
+    return this.#hp;
   }
 }
 
