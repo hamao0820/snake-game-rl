@@ -75,7 +75,7 @@ for i_episode in tqdm(range(num_episodes)):
                 next_state_frame1 = torch.zeros((1, n_frame, resize_image, resize_image), dtype=torch.float32)
             frame1 = False
 
-        reward_frame += reward
+        reward_frame += t_reward
 
         if (total_steps % n_frame == 0) or done:
             agent.push_memory(state_frame1, action_frame1, next_state_frame1, reward_frame)
