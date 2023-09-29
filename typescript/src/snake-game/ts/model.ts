@@ -15,7 +15,7 @@ class Model {
     this.#snake = new Snake();
     this.#stage = new Stage();
     this.#score = new Score();
-    this.#foods = Array.from({ length: 5 }, () => this.createFood());
+    this.#foods = Array.from({ length: 1 }, () => this.createFood());
   }
 
   update(isCollisionSelf: boolean) {

@@ -127,7 +127,7 @@ class Simulator {
     if (this.#model.gameOver) reward = -1;
     reward += (this.#model.score - this.#prevScore) * 0.05;
     this.#prevScore = this.#model.score;
-    if(this.#model.snake.hp <= 0) reward -= 0.003;
+    if(this.#model.snake.hp <= 0) reward -= 0.001;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward };
   }
