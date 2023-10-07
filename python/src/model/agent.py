@@ -15,8 +15,8 @@ class DQNAgent:
     EPS_END = 0.01
     EPS_DECAY = 100000
     N_ACTIONS = 3
-    SIZE_REPLAY_MEMORY = 1000
-    BATCH_SIZE = 32
+    SIZE_REPLAY_MEMORY = 10000
+    BATCH_SIZE = 256
     TAU = 0.005
     LR = 1e-4
 
