@@ -53,7 +53,7 @@ for i_episode in tqdm(range(num_episodes)):
         total_steps += 1
         action, eps_threshold = agent.e_greedy_select_action(state_frame, steps_done)
         steps_done += 1
-        observation, reward, terminated, truncated, info = env.step(action.item())
+        observation, reward, terminated, truncated, info = env.step(action.item(), t)
 
         done = terminated or truncated
 

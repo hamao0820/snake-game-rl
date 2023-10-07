@@ -41,8 +41,8 @@ class SnakeGameEnv:
         self.__frames = [frame_array]
         return frame_array, info
 
-    def step(self, action: Action) -> Tuple[np.ndarray, float, bool, bool, dict]:
-        observation, reward, terminated, truncated, info = self.__client.step(action)
+    def step(self, action: Action, count: int) -> Tuple[np.ndarray, float, bool, bool, dict]:
+        observation, reward, terminated, truncated, info = self.__client.step(action, count)
         frame_image = cv2.imdecode(
             np.frombuffer(io.BytesIO(bytes(observation["data"])).read(), np.uint8), cv2.IMREAD_COLOR
         )

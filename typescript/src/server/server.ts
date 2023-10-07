@@ -1,6 +1,6 @@
 import Simulator, { Action } from '../simulater/simulator';
 
-type Message = { method: 'reset'; data: {} } | { method: 'step'; data: { action: Action } };
+type Message = { method: 'reset'; data: {} } | { method: 'step'; data: { action: Action; count: number } };
 type StepResponse = {
   observation: string | Buffer;
   reward: number;
@@ -41,13 +41,13 @@ const server = Bun.serve<{ authToken: string }>({
         }
         case 'step': {
           const action = Number(data.data.action) as Action;
-          const state = await simulator.step(action);
+          const state = await simulator.step(action, data.data.count);
           if (state === undefined) throw new Error('state is undefined');
           const res: StepResponse = {
             observation: state.imageBuffer,
             reward: state.reward,
             terminated: state.done,
-            truncated: false,
+            truncated: state.truncated,
             info: {},
           };
           ws.send(JSON.stringify(res));
