@@ -29,9 +29,9 @@ def to_resize_gray(image: np.ndarray, resize: int) -> torch.Tensor:
 
 env = SnakeGameEnv()
 n_actions = env.action_space.n
-agent = DQNAgent(n_frame=n_frame, device=device, state_dict_path="model_weights/12/snake-game_policy.pth")
+agent = DQNAgent(n_frame=n_frame, device=device)
 
-terminated = True
+done = True
 frame1 = True
 total_steps = 0
 count_update = 0
@@ -41,7 +41,7 @@ reward_durations = []
 
 for i_episode in tqdm(range(num_episodes)):
     reward_frame = torch.tensor([0], dtype=torch.float32)
-    if terminated == True:
+    if done:
         state_frame = torch.zeros((1, n_frame, resize_image, resize_image), dtype=torch.float32)
         next_state_frame = torch.zeros((1, n_frame, resize_image, resize_image), dtype=torch.float32)
         state, info = env.reset()
@@ -67,7 +67,7 @@ for i_episode in tqdm(range(num_episodes)):
         next_state_frame = torch.roll(input=next_state_frame, shifts=1, dims=1)
         next_state_frame[:, 0, :, :] = next_state
 
-        if frame1 == True:
+        if frame1:
             state_frame1 = state_frame
             action_frame1 = action
             next_state_frame1 = next_state_frame
@@ -102,7 +102,7 @@ for i_episode in tqdm(range(num_episodes)):
             np.arange(0, (i_episode / num_episode_plot + 1) * num_episode_plot, num_episode_plot),
             torch.tensor(reward_durations, dtype=torch.float).numpy(),
         )
-        plt.savefig(f"progress/reward_duration.png")
+        plt.savefig("progress/reward_duration.png")
         plt.clf()
 
         if (i_episode % num_episode_save) == 0:

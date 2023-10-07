@@ -31,7 +31,9 @@ class DQNAgent:
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=DQNAgent.LR, amsgrad=True)
 
     def e_greedy_select_action(self, state: torch.Tensor, steps_done) -> Tuple[torch.Tensor, float]:
-        eps_threshold = DQNAgent.EPS_END + (DQNAgent.EPS_START - DQNAgent.EPS_END) * math.exp(-1.0 * steps_done / DQNAgent.EPS_DECAY)
+        eps_threshold = DQNAgent.EPS_END + (DQNAgent.EPS_START - DQNAgent.EPS_END) * math.exp(
+            -1.0 * steps_done / DQNAgent.EPS_DECAY
+        )
         steps_done += 1
 
         if random.random() > eps_threshold:
