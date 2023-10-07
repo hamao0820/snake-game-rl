@@ -12,7 +12,7 @@ from replay_buffer import ReplayMemory, Transition
 class DQNAgent:
     GAMMA = 0.99
     EPS_START = 0.8
-    EPS_END = 0.01
+    EPS_END = 0.10
     EPS_DECAY = 100000
     N_ACTIONS = 3
     SIZE_REPLAY_MEMORY = 10000

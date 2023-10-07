@@ -9,16 +9,24 @@ class Dueling_Network(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
-        self.coord_conv = CoordConv2d(n_frame, 32, 3, 1)
-        self.pool1 = nn.MaxPool2d(2, 2)
-        self.conv = nn.Conv2d(32, 64, 3, 1)
+        self.coord_conv = CoordConv2d(n_frame, 64, 3, 1, 1)
 
-        self.act_fc = nn.Linear(97344, 512)
+        self.conv = nn.Conv2d(64, 64, 3, 1, 1)
+        self.conv2 = nn.Conv2d(64, 64, 3, 1, 1)
+
+        self.pool = nn.MaxPool2d(2, 2)
+
+        self.conv3 = nn.Conv2d(64, 128, 3, 1)
+        self.pool2 = nn.MaxPool2d(2, 2)
+
+        self.act_fc = nn.Linear(51200, 512)
         self.act_fc2 = nn.Linear(512, n_actions)
-        self.value_fc = nn.Linear(97344, 512)
+        self.value_fc = nn.Linear(51200, 512)
         self.value_fc2 = nn.Linear(512, 1)
         torch.nn.init.kaiming_normal_(self.coord_conv.weight)
         torch.nn.init.kaiming_normal_(self.conv.weight)
+        torch.nn.init.kaiming_normal_(self.conv2.weight)
+        torch.nn.init.kaiming_normal_(self.conv3.weight)
         torch.nn.init.kaiming_normal_(self.act_fc.weight)
         torch.nn.init.kaiming_normal_(self.act_fc2.weight)
         torch.nn.init.kaiming_normal_(self.value_fc.weight)
@@ -26,9 +34,14 @@ class Dueling_Network(nn.Module):
         self.flatten = nn.Flatten()
 
     def forward(self, x):
-        x = self.relu(self.coord_conv(x))
-        x = self.pool1(x)
-        x = self.relu(self.conv(x))
+        res_x = self.relu(self.coord_conv(x))
+
+        x = self.relu(self.conv(res_x))
+        x = self.relu(self.conv2(x))
+        x = self.relu(res_x + x)
+        x = self.pool(x)
+        x = self.relu(self.conv3(x))
+        x = self.pool2(x)
         x = self.flatten(x)
 
         x_act = self.relu(self.act_fc(x))
