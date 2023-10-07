@@ -129,7 +129,7 @@ class Simulator {
     this.#prevScore = this.#model.score;
     if (this.#model.snake.hp <= 0) reward -= 0.001;
 
-    const truncated = count >= this.#model.snake.positionList.length * 10;
+    const truncated = count >= this.#model.snake.positionList.length * 3;
 
     return { done: this.#model.gameOver, score: this.#model.score, imageBuffer: await this.ss(), reward , truncated};
   }
